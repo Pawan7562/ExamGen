@@ -1,0 +1,40 @@
+{
+  "name": "exam-monitoring-system",
+  "description": "Professional Online Examination Monitoring System with AI-Powered Proctoring",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start",
+    "lint": "cd frontend && npm run lint",
+    "preview": "cd frontend && npm run preview",
+    "backend": "cd backend && node server.js",
+    "install-all": "npm install && cd frontend && npm install"
+  },
+  "keywords": [
+    "exam",
+    "monitoring",
+    "proctoring",
+    "education",
+    "react",
+    "frontend",
+    "backend",
+    "online-examination",
+    "academic-integrity",
+    "ai-proctoring",
+    "cheating-detection",
+    "professional-education"
+  ],
+  "author": "Exam Monitor Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exam-monitor/exam-monitoring-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/exam-monitor/exam-monitoring-system/issues"
+  },
+  "homepage": "https://exam-monitor.com"
+}
