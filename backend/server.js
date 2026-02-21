@@ -99,7 +99,7 @@ app.use(express.urlencoded({ extended: true }));
 // Enable CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
+    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz'] 
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://127.0.0.1:5175', 'http://127.0.0.1:5176'],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -211,11 +211,11 @@ app.use(errorHandler);
 
 // Serve static files from frontend in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('../frontend/dist'));
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
   
   // For any request that doesn't match an API route, serve the frontend
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   });
 }
 
