@@ -35,5 +35,8 @@
   "bugs": {
     "url": "https://github.com/exam-monitor/exam-monitoring-system/issues"
   },
-  "homepage": "https://exam-monitor.com"
+  "homepage": "https://exam-monitor.com",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
