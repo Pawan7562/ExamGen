@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load env vars
 dotenv.config();
@@ -207,6 +208,16 @@ if (process.env.NODE_ENV !== 'production') {
 // Error handler middleware
 const errorHandler = require('./middlewares/errorHandler');
 app.use(errorHandler);
+
+// Serve static files from frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('../frontend/dist'));
+  
+  // For any request that doesn't match an API route, serve the frontend
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 5001;
 
