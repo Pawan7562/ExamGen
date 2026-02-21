@@ -1,30 +1,35 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const dotenv = require('dotenv');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load env vars
 dotenv.config();
 
 // Route files
-const auth = require('../backend/routes/auth');
-const exams = require('../backend/routes/exams');
-const examAccess = require('../backend/routes/examAccess');
-const instantExams = require('../backend/routes/instantExams');
-const questionBanks = require('../backend/routes/questionBanks');
-const analytics = require('../backend/routes/analytics');
-const notifications = require('../backend/routes/notifications');
-const admin = require('../backend/routes/admin');
-const proctoring = require('../backend/routes/proctoring');
-const reports = require('../backend/routes/reports');
-const invitations = require('../backend/routes/invitations');
-const codingQuestions = require('../backend/routes/codingQuestions');
-const codingExams = require('../backend/routes/codingExamRoutes');
+import auth from '../backend/routes/auth.cjs';
+import exams from '../backend/routes/exams.cjs';
+import examAccess from '../backend/routes/examAccess.cjs';
+import instantExams from '../backend/routes/instantExams.cjs';
+import questionBanks from '../backend/routes/questionBanks.cjs';
+import analytics from '../backend/routes/analytics.cjs';
+import notifications from '../backend/routes/notifications.cjs';
+import admin from '../backend/routes/admin.cjs';
+import proctoring from '../backend/routes/proctoring.cjs';
+import reports from '../backend/routes/reports.cjs';
+import invitations from '../backend/routes/invitations.cjs';
+import codingQuestions from '../backend/routes/codingQuestions.cjs';
+import codingExams from '../backend/routes/codingExamRoutes.cjs';
 
 // Connect to database
-const connectDB = require('../backend/config/database');
+import connectDB from '../backend/config/database.cjs';
 connectDB();
 
 const app = express();
@@ -60,7 +65,7 @@ app.use(express.urlencoded({ extended: true }));
 // Enable CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz', 'https://exam-monitoring.vercel.app'] 
+    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz', 'https://exam-monitoring.onrender.com'] 
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://127.0.0.1:5175', 'http://127.0.0.1:5176'],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -100,7 +105,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Error handler middleware
-const errorHandler = require('../backend/middlewares/errorHandler');
+import errorHandler from '../backend/middlewares/errorHandler.cjs';
 app.use(errorHandler);
 
-module.exports = app;
+export default app;
