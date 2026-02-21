@@ -1,8 +1,7 @@
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
-const uuid = require('uuid');
-const { v4: uuidv4 } = uuid;
+const { v4: uuidv4 } = require('uuid');
 
 class CodeExecutionService {
   constructor() {
