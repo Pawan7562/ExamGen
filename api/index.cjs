@@ -1,35 +1,30 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// ES module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const dotenv = require('dotenv');
+const path = require('path');
 
 // Load env vars
 dotenv.config();
 
 // Route files
-import auth from '../backend/routes/auth.cjs';
-import exams from '../backend/routes/exams.cjs';
-import examAccess from '../backend/routes/examAccess.cjs';
-import instantExams from '../backend/routes/instantExams.cjs';
-import questionBanks from '../backend/routes/questionBanks.cjs';
-import analytics from '../backend/routes/analytics.cjs';
-import notifications from '../backend/routes/notifications.cjs';
-import admin from '../backend/routes/admin.cjs';
-import proctoring from '../backend/routes/proctoring.cjs';
-import reports from '../backend/routes/reports.cjs';
-import invitations from '../backend/routes/invitations.cjs';
-import codingQuestions from '../backend/routes/codingQuestions.cjs';
-import codingExams from '../backend/routes/codingExamRoutes.cjs';
+const auth = require('../backend/routes/auth');
+const exams = require('../backend/routes/exams');
+const examAccess = require('../backend/routes/examAccess');
+const instantExams = require('../backend/routes/instantExams');
+const questionBanks = require('../backend/routes/questionBanks');
+const analytics = require('../backend/routes/analytics');
+const notifications = require('../backend/routes/notifications');
+const admin = require('../backend/routes/admin');
+const proctoring = require('../backend/routes/proctoring');
+const reports = require('../backend/routes/reports');
+const invitations = require('../backend/routes/invitations');
+const codingQuestions = require('../backend/routes/codingQuestions');
+const codingExams = require('../backend/routes/codingExamRoutes');
 
 // Connect to database
-import connectDB from '../backend/config/database.cjs';
+const connectDB = require('../backend/config/database');
 connectDB();
 
 const app = express();
@@ -105,7 +100,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Error handler middleware
-import errorHandler from '../backend/middlewares/errorHandler.cjs';
+const errorHandler = require('../backend/middlewares/errorHandler');
 app.use(errorHandler);
 
-export default app;
+module.exports = app;

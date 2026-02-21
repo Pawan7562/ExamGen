@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "cd frontend && npm run dev",
     "build": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../frontend && npm run build",
-    "start": "node api/index.js",
+    "start": "node api/index.cjs",
     "lint": "cd frontend && npm run lint",
     "preview": "cd frontend && npm run preview",
     "backend": "cd backend && node server.js",
