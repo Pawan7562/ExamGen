@@ -3,6 +3,10 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+console.log("Starting server...");
+console.log("PORT =", process.env.PORT);
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -118,12 +122,22 @@ app.get('/api/v1/test', (req, res) => {
   });
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.send("API Running ✅");
+});
+
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Catch all handler for frontend SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
 
 module.exports = app;
