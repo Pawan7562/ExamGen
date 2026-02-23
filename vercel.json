@@ -9,9 +9,7 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "installCommand": "npm install",
-        "buildCommand": "npm run build",
-        "outputDirectory": "dist"
+        "distDir": "dist"
       }
     }
   ],
@@ -26,10 +24,6 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "VITE_API_URL": "https://exam-monitoring-epvh.onrender.com/api/v1",
-    "VITE_APP_NAME": "Exam Monitoring System",
-    "VITE_APP_VERSION": "1.0.0",
-    "VITE_NODE_ENV": "production"
+    "NODE_ENV": "production"
   }
 }

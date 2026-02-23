@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -11,6 +10,21 @@ dotenv.config();
 // Connect DB
 const connectDB = require('./config/database');
 connectDB();
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 1000,
+  limit: process.env.NODE_ENV === 'production' ? 1000 : 100000,
+});
+
+// Rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Route files
 const auth = require('./routes/auth');
@@ -31,17 +45,6 @@ const app = express();
 
 app.use(helmet());
 
-// Rate limiting
-const generalLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 1000,
-  limit: process.env.NODE_ENV === 'production' ? 1000 : 100000,
-});
-
-const authLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 1000,
-  limit: process.env.NODE_ENV === 'production' ? 10 : 10000,
-});
-
 // Apply limiter only in production
 if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
   app.use(generalLimiter);
@@ -54,7 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 // CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz']
+    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz', 'https://exam-monitoring-epvh.onrender.com']
     : true,
   credentials: true,
 }));
@@ -68,7 +71,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Routes
-app.use('/api/v1/auth', auth);
+if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
+  app.use('/api/v1/auth', authLimiter, auth);
+} else {
+  app.use('/api/v1/auth', auth);
+}
 
 app.use('/api/v1/exams', exams);
 app.use('/api/v1/exam-access', examAccess);
