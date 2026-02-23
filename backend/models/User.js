@@ -56,6 +56,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     sparse: true
   },
+  // Link student to admin who created/uploaded them
+  adminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+    default: null
+  },
   // Teacher/Admin specific fields
   institution: {
     type: String,
@@ -117,6 +124,7 @@ const userSchema = new mongoose.Schema({
 // Index for better query performance
 userSchema.index({ email: 1 });
 userSchema.index({ userType: 1 });
+userSchema.index({ adminId: 1, userType: 1 }); // For admin-student queries
 
 // Generate unique student ID for new students
 userSchema.pre('save', function(next) {
