@@ -1,8 +1,11 @@
 // Updated API service with proper error handling and debugging
 import axios from 'axios';
 
-// Use relative URL since Vercel will proxy API requests to Render
-const API_BASE_URL = '/api/v1';
+// Use environment variable for API URL, fallback to relative for local development
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
+console.log('🌐 API Base URL:', API_BASE_URL);
+console.log('🔧 Environment:', import.meta.env.MODE);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
