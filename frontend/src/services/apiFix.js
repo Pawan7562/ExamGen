@@ -6,6 +6,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 console.log('🔧 Environment:', import.meta.env.MODE);
+console.log('📋 VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('🔍 Full API URL for debugging:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
