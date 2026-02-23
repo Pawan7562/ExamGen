@@ -6,6 +6,7 @@ const compression = require('compression');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 // Import production modules
 const logger = require('./utils/logger');

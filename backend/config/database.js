@@ -11,7 +11,7 @@ const connectDB = async () => {
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
       family: 4, // Use IPv4, skip trying IPv6
       bufferMaxEntries: 0, // Disable mongoose buffering
-      bufferCommands: false, // Disable mongoose buffering
+      bufferCommands: process.env.NODE_ENV === 'development', // Enable buffering for development
       retryWrites: true, // Retry write operations if they fail
       w: 'majority' // Write acknowledgment
     });
