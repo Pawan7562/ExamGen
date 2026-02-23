@@ -10,7 +10,6 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
       family: 4, // Use IPv4, skip trying IPv6
-      bufferMaxEntries: 0, // Disable mongoose buffering
       bufferCommands: process.env.NODE_ENV === 'development', // Enable buffering for development
       retryWrites: true, // Retry write operations if they fail
       w: 'majority' // Write acknowledgment
@@ -38,16 +37,19 @@ const connectDB = async () => {
         logger.info('MongoDB connection closed through app termination');
         process.exit(0);
       } catch (err) {
+        console.error('Error closing MongoDB connection:', err);
         logger.error('Error closing MongoDB connection:', err);
         process.exit(1);
       }
     });
 
   } catch (error) {
+    console.error('❌ Database connection error:', error.message);
     logger.error('❌ Database connection error:', error.message);
 
     // Don't exit in development, just warn
     if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ Running without database connection in development mode');
       logger.warn('⚠️ Running without database connection in development mode');
       return;
     }
