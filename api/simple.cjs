@@ -54,6 +54,40 @@ app.post('/api/v1/auth/login', (req, res) => {
   }
 });
 
+// Mock admin registration endpoint
+app.post('/api/v1/auth/register/admin', (req, res) => {
+  const { fullName, email, password, confirmPassword } = req.body;
+  
+  console.log('📝 Admin registration attempt:', email);
+  
+  if (!fullName || !email || !password || !confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'All fields are required'
+    });
+  }
+  
+  if (password !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Passwords do not match'
+    });
+  }
+  
+  // Mock successful registration
+  res.status(201).json({
+    success: true,
+    message: 'Admin registration successful',
+    user: {
+      id: 'new-admin-id',
+      fullName,
+      email,
+      userType: 'admin',
+      isActive: true
+    }
+  });
+});
+
 // Mock user profile endpoint
 app.get('/api/v1/auth/me', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');

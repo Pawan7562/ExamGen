@@ -937,6 +937,7 @@ const StudentCodingExam = () => {
                 selectionHighlight: true,
                 smoothScrolling: true,
                 suggestSelection: 'first',
+                wordWrap: 'on',
                 wrappingIndent: 'indent'
               }}
             />
