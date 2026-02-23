@@ -5,12 +5,27 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "cd frontend && npm run dev",
-    "build": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../frontend && npm run build",
-    "start": "node backend/server.js",
-    "lint": "cd frontend && npm run lint",
-    "preview": "cd frontend && npm run preview",
-    "backend": "cd backend && node server.js",
-    "install-all": "npm install && cd frontend && npm install"
+    "build": "npm run install-all && cd frontend && npm run build",
+    "build:production": "npm run install-all && cd frontend && npm run build --config vite.config.production.js",
+    "start": "node backend/server.production.js",
+    "start:dev": "cd backend && npm run dev",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:skip-tests": "./scripts/deploy.sh skip-tests",
+    "deploy:production": "NODE_ENV=production ./scripts/deploy.sh",
+    "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
+    "lint:fix": "cd frontend && npm run lint:fix && cd ../backend && npm run lint:fix",
+    "test": "cd frontend && npm test && cd ../backend && npm test",
+    "test:watch": "cd frontend && npm run test:watch",
+    "security:audit": "cd frontend && npm audit && cd ../backend && npm audit",
+    "security:fix": "cd frontend && npm audit fix && cd ../backend && npm audit fix",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "install:production": "npm install --production && cd frontend && npm install --production=false && cd ../backend && npm install --production",
+    "clean": "rm -rf frontend/dist frontend/node_modules backend/node_modules node_modules",
+    "clean:install": "npm run clean && npm run install-all",
+    "docker:build": "docker build -t exam-monitoring-backend ./backend",
+    "docker:run": "docker run -p 5001:5001 exam-monitoring-backend",
+    "logs:backend": "cd backend && npm run logs",
+    "logs:errors": "cd backend && npm run errors"
   },
   "keywords": [
     "exam",
@@ -18,24 +33,21 @@
     "proctoring",
     "education",
     "react",
-    "frontend",
-    "backend",
-    "online-examination",
-    "academic-integrity",
-    "ai-proctoring",
-    "cheating-detection",
-    "professional-education"
+    "nodejs",
+    "mongodb",
+    "production",
+    "enterprise"
   ],
-  "author": "Exam Monitor Development Team",
+  "author": "Exam Monitoring Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/exam-monitor/exam-monitoring-system.git"
+    "url": "https://github.com/pawankumaryadav75628697-bot/Exam-monitoring.git"
   },
   "bugs": {
-    "url": "https://github.com/exam-monitor/exam-monitoring-system/issues"
+    "url": "https://github.com/pawankumaryadav75628697-bot/Exam-monitoring/issues"
   },
-  "homepage": "https://exam-monitor.com",
+  "homepage": "https://www.pkthenexgenexam.xyz",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
