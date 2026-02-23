@@ -2,29 +2,31 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 const dotenv = require('dotenv');
+
+// Import production modules
+const logger = require('./utils/logger');
+const { 
+  generalLimiter, 
+  authLimiter, 
+  apiLimiter, 
+  uploadLimiter,
+  helmetConfig,
+  xssProtection,
+  validateRequest,
+  ipBlockMiddleware,
+  sessionSecurity
+} = require('./middlewares/security');
 
 // Load env vars
 dotenv.config();
 
 // Connect DB
-const connectDB = require('./config/database');
+const { connectDB } = require('./config/database');
 connectDB();
-
-// Rate limiting
-const generalLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 1000,
-  limit: process.env.NODE_ENV === 'production' ? 1000 : 100000,
-});
-
-// Rate limiter for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: 'Too many authentication attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // Route files
 const auth = require('./routes/auth');
@@ -40,39 +42,71 @@ const reports = require('./routes/reports');
 const invitations = require('./routes/invitations');
 const codingQuestions = require('./routes/codingQuestions');
 const codingExams = require('./routes/codingExamRoutes');
+const health = require('./routes/health');
 
 const app = express();
 
-app.use(helmet());
+// Production security middleware
+app.use(helmet(helmetConfig));
+app.use(compression());
+app.use(sessionSecurity);
+app.use(ipBlockMiddleware);
 
-// Apply limiter only in production
+// Data sanitization
+app.use(mongoSanitize());
+app.use(hpp());
+app.use(xssProtection);
+app.use(validateRequest);
+
+// Rate limiting (production only)
 if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
   app.use(generalLimiter);
 }
 
 // Body parser
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// CORS
+// CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : process.env.NODE_ENV === 'production'
+    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz']
+    : true;
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz', 'https://exam-monitoring-epvh.onrender.com']
-    : true,
+  origin: allowedOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Debug logs (only dev)
-if (process.env.NODE_ENV !== 'production') {
-  app.use('/api', (req, res, next) => {
-    console.log(`🔥 ${req.method} ${req.originalUrl}`);
-    next();
+// Request logging middleware
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    const responseTime = Date.now() - startTime;
+    logger.logRequest(req, res, responseTime);
   });
-}
+  
+  next();
+});
 
-// Routes
+// Health check routes
+app.use('/api/health', health);
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// API routes with rate limiting
 if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
   app.use('/api/v1/auth', authLimiter, auth);
+  app.use('/api/v1', apiLimiter);
 } else {
   app.use('/api/v1/auth', auth);
 }
@@ -92,33 +126,94 @@ app.use('/api/v1/coding-exams', codingExams);
 
 // Root route
 app.get('/', (req, res) => {
-  res.send('🚀 API Running');
-});
-
-// Health
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'API is running',
-    timestamp: new Date().toISOString(),
+  res.json({
+    name: process.env.APP_NAME || 'Exam Monitoring System',
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV,
+    status: 'running',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Error handler
-const errorHandler = require('./middlewares/errorHandler');
-app.use(errorHandler);
+// Production error handler
+app.use((error, req, res, next) => {
+  logger.logError(error, req, {
+    userAgent: req.get('User-Agent'),
+    ip: req.ip
+  });
+
+  // Don't leak error details in production
+  const response = {
+    success: false,
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : error.message,
+    timestamp: new Date().toISOString()
+  };
+
+  if (process.env.NODE_ENV !== 'production') {
+    response.error = error.stack;
+  }
+
+  res.status(error.status || 500).json(response);
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl,
+    timestamp: new Date().toISOString()
+  });
+});
 
 const PORT = process.env.PORT || 5001;
 
-// IMPORTANT → store server instance
+// Graceful shutdown
+const gracefulShutdown = (signal) => {
+  logger.info(`Received ${signal}, starting graceful shutdown`);
+  
+  server.close(() => {
+    logger.info('HTTP server closed');
+    
+    // Close database connection
+    if (mongoose.connection.readyState === 1) {
+      mongoose.connection.close(() => {
+        logger.info('MongoDB connection closed');
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
+    }
+  });
+
+  // Force close after 30 seconds
+  setTimeout(() => {
+    logger.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 30000);
+};
+
+// Start server
 const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  logger.info(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  logger.info(`📊 Health check available at http://localhost:${PORT}/api/health`);
 });
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle unhandled rejections
 process.on('unhandledRejection', (err) => {
-  console.error(`❌ Error: ${err.message}`);
-  server.close(() => process.exit(1));
+  logger.error('Unhandled Rejection:', err);
+  gracefulShutdown('unhandledRejection');
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  gracefulShutdown('uncaughtException');
 });
 
 module.exports = app;
