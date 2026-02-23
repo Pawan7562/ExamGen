@@ -6,20 +6,11 @@
   "scripts": {
     "dev": "cd frontend && npm run dev",
     "build": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../frontend && npm run build",
-    "start": "node backend/server.js",
-    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
-    "test": "cd backend && npm test",
-    "test:watch": "cd backend && npm run test:watch",
-    "test:coverage": "cd backend && npm run test:coverage",
-    "security-check": "cd backend && npm audit && cd ../frontend && npm audit",
-    "deploy:prod": "chmod +x scripts/deploy-production.sh && ./scripts/deploy-production.sh",
-    "docker:build": "cd backend && docker build -f Dockerfile.production -t exammonitor-backend .",
-    "docker:run": "docker run -p 5001:5001 --env-file backend/.env.production exammonitor-backend",
-    "setup:prod": "cp backend/.env.production backend/.env && mkdir -p backend/logs backend/uploads",
-    "logs:backend": "cd backend && tail -f logs/combined.log",
-    "logs:errors": "cd backend && tail -f logs/error.log",
-    "health": "curl -f http://localhost:5001/api/health || echo 'Backend not running'",
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "start": "node api/simple.cjs",
+    "lint": "cd frontend && npm run lint",
+    "preview": "cd frontend && npm run preview",
+    "backend": "cd backend && node server.js",
+    "install-all": "npm install && cd frontend && npm install"
   },
   "keywords": [
     "exam",

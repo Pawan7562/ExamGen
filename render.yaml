@@ -1,0 +1,37 @@
+services:
+  # Backend API Service
+  - type: web
+    name: exam-monitoring-backend
+    env: node
+    plan: free
+    buildCommand: "cd backend && npm install --production"
+    startCommand: "cd backend && node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+    healthCheck:
+      path: /api/health
+      initialDelaySeconds: 30
+      intervalSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
