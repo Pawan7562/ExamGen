@@ -7,7 +7,7 @@
     "dev": "cd frontend && npm run dev",
     "build": "npm run install-all && cd frontend && npm run build",
     "build:production": "npm run install-all && cd frontend && npm run build --config vite.config.production.js",
-    "start": "node backend/server.production.js",
+    "start": "node backend/server.js",
     "start:dev": "cd backend && npm run dev",
     "deploy": "./scripts/deploy.sh",
     "deploy:skip-tests": "./scripts/deploy.sh skip-tests",

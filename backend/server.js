@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -67,11 +68,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Routes
-if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
-  app.use('/api/v1/auth', authLimiter, auth);
-} else {
-  app.use('/api/v1/auth', auth);
-}
+app.use('/api/v1/auth', auth);
 
 app.use('/api/v1/exams', exams);
 app.use('/api/v1/exam-access', examAccess);
