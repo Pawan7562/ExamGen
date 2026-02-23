@@ -1,8 +1,8 @@
 // Updated API service with proper error handling and debugging
 import axios from 'axios';
 
-// Use environment variable for API URL, fallback to relative for local development
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+// Use environment variable for API URL, fallback to correct production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://exam-monitoring-epvh.onrender.com/api/v1';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 console.log('🔧 Environment:', import.meta.env.MODE);
