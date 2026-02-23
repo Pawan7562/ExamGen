@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 const protect = async (req, res, next) => {
   try {
@@ -26,6 +27,19 @@ const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log('✅ JWT token verified, user ID:', decoded.id);
       
+      // Handle mock token in development
+      if (decoded.id === 'mock-admin-id' && process.env.NODE_ENV === 'development') {
+        console.log('🔧 Using mock admin user for development');
+        req.user = {
+          _id: 'mock-admin-id',
+          fullName: 'Test Admin',
+          email: 'admin@test.com',
+          userType: 'admin',
+          isActive: true
+        };
+        return next();
+      }
+      
       req.user = await User.findById(decoded.id).select('-password');
       
       if (!req.user) {
@@ -45,6 +59,20 @@ const protect = async (req, res, next) => {
       next();
     } catch (error) {
       console.log('❌ JWT verification failed:', error.message);
+      
+      // Handle mock token verification error in development
+      if (token === 'mock-jwt-token-for-testing' && process.env.NODE_ENV === 'development') {
+        console.log('🔧 Using mock admin user for development (fallback)');
+        req.user = {
+          _id: 'mock-admin-id',
+          fullName: 'Test Admin',
+          email: 'admin@test.com',
+          userType: 'admin',
+          isActive: true
+        };
+        return next();
+      }
+      
       return res.status(401).json({
         success: false,
         message: 'Not authorized to access this route',
