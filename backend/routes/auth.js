@@ -8,6 +8,17 @@ const {
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/auth');
 
+// Simple test endpoint (no database)
+router.post('/test', (req, res) => {
+  console.log(' Auth test endpoint called');
+  res.status(200).json({
+    success: true,
+    message: 'Auth test endpoint working',
+    body: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Public routes
 router.post('/register/student', registerStudent);
 router.post('/register/admin', registerAdmin);

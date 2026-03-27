@@ -96,6 +96,16 @@ app.use('/api/v1/invitations', invitations);
 app.use('/api/v1/coding-questions', codingQuestions);
 app.use('/api/v1/coding-exams', codingExams);
 
+// Test endpoint
+app.get('/api/v1/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Test endpoint working',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.send('🚀 API Running');
