@@ -63,7 +63,7 @@ app.use(express.urlencoded({ extended: true }));
 // CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://examgen.vercel.app', 'https://www.examgen.vercel.app', 'https://pkthenexgenexam.vercel.app', 'https://www.pkthenexgenexam.vercel.app']
+    ? ['https://examgen.vercel.app', 'https://www.examgen.vercel.app', 'https://pkthenexgenexam.vercel.app', 'https://www.pkthenexgenexam.vercel.app', 'https://www.pkthenexgenexam.xyz', 'https://pkthenexgenexam.xyz']
     : true,
   credentials: true,
 }));
