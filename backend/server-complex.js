@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -91,7 +92,11 @@ app.get('/', (req, res) => {
   res.send('🚀 API Running');
 });
 
-// Health check
+// Production health check
+const { healthCheck } = require('./middleware/monitoring');
+app.get('/api/v1/health', healthCheck);
+
+// Health
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -100,32 +105,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.get('/api/v1/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    uptime: process.uptime()
-  });
-});
-
-// Simple error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message
-  });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
-});
+// Error handler
+const { globalErrorHandler } = require('./middleware/errorHandler');
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5001;
 
