@@ -112,7 +112,7 @@ app.get('/api/v1/test', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   console.log('🏠 Root endpoint called');
-  res.send('🚀 API Running - Latest Deployment');
+  res.send('🚀 API Running - VERSION 3.0 - Rate Limiting OFF');
 });
 
 // Simple test
