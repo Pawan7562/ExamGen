@@ -53,7 +53,10 @@ const authLimiter = rateLimit({
 
 // Apply limiter only in production
 if (process.env.NODE_ENV === 'production' && !process.env.DISABLE_RATE_LIMIT) {
+  console.log(' Rate limiting ENABLED');
   app.use(generalLimiter);
+} else {
+  console.log(' Rate limiting DISABLED');
 }
 
 // Body parser
