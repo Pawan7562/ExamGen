@@ -92,6 +92,10 @@ app.get('/', (req, res) => {
   res.send('🚀 API Running');
 });
 
+// Production health check
+const { healthCheck } = require('./middleware/monitoring');
+app.get('/api/v1/health', healthCheck);
+
 // Health
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -102,8 +106,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // Error handler
-const errorHandler = require('./middlewares/errorHandler');
-app.use(errorHandler);
+const { globalErrorHandler } = require('./middleware/errorHandler');
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5001;
 
