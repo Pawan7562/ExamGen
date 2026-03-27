@@ -283,10 +283,10 @@ const StudentManagement = () => {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
       analytics.recentRegistrations = allStudents
-        ?.filter(student => new Date(student.createdAt || Date.now()) >= sevenDaysAgo)
-        ?.sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()))
-        ?.slice(0, 5)
-        ?.map(student => ({
+        .filter(student => new Date(student.createdAt || Date.now()) >= sevenDaysAgo)
+        .sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()))
+        .slice(0, 5)
+        .map(student => ({
           name: student.fullName,
           email: student.email,
           course: student.course,
@@ -663,8 +663,7 @@ const StudentManagement = () => {
           
           if (response.ok) {
             uploadedCount++;
-            // Fix: Get studentId from the correct location in response
-            const studentId = data.data?.data?.student?._id || data.data?.data?.studentId;
+            const studentId = data.data?._id;
             
             if (studentId) {
               successfulStudents.push({
@@ -678,6 +677,7 @@ const StudentManagement = () => {
               successfulStudents.push({
                 ...student,
                 _id: null, // Will be resolved later
+                email: student.email
               });
             }
           } else {
@@ -1337,7 +1337,7 @@ const StudentManagement = () => {
                 </thead>
                 <tbody>
                   {Array.isArray(students) && students.length > 0 ? (
-                    students?.map((student, index) => (
+                    students.map((student, index) => (
                       <tr key={student._id || `student-${index}`} className="student-row">
                         <td className="avatar-cell">
                           <div className="student-avatar">
@@ -1788,11 +1788,11 @@ Jane Smith,jane@example.com,9876543211,Information Technology,2,2025,IT002`}</pr
                     <div className="result-details">
                       <h4>Upload Failed</h4>
                       <div className="error-list">
-                        {uploadResults.errors?.map((error, index) => (
+                        {uploadResults.errors.map((error, index) => (
                           <div key={index} className="error-item">• {error}</div>
                         ))}
-                        {uploadResults.totalErrors > uploadResults.errors?.length && (
-                          <div className="error-item">• ... and {uploadResults.totalErrors - uploadResults.errors?.length} more errors</div>
+                        {uploadResults.totalErrors > uploadResults.errors.length && (
+                          <div className="error-item">• ... and {uploadResults.totalErrors - uploadResults.errors.length} more errors</div>
                         )}
                       </div>
                     </div>

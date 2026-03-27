@@ -19,13 +19,6 @@ const {
   getStudentStats,
   resendCredentials
 } = require('../controllers/studentController');
-const {
-  getAdminDashboard,
-  getAdminProfile,
-  updateAdminProfile,
-  getAdminSettings,
-  updateAdminSettings
-} = require('../controllers/adminDashboardController');
 const { protect, authorize } = require('../middlewares/auth');
 const { uploadSingle } = require('../middlewares/upload');
 
@@ -34,14 +27,7 @@ const router = express.Router();
 // All routes require authentication
 router.use(protect);
 
-// Admin-specific dashboard routes (complete data isolation)
-router.get('/dashboard/isolated', authorize('admin'), getAdminDashboard);
-router.get('/profile', authorize('admin'), getAdminProfile);
-router.put('/profile', authorize('admin'), updateAdminProfile);
-router.get('/settings', authorize('admin'), getAdminSettings);
-router.put('/settings', authorize('admin'), updateAdminSettings);
-
-// Legacy dashboard routes (for backward compatibility)
+// Dashboard routes
 router.get('/dashboard', authorize('admin', 'teacher'), getDashboard);
 
 // User management routes

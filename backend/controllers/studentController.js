@@ -16,80 +16,80 @@ const generatePassword = () => {
 // @access  Private (Admin only)
 exports.getAllStudents = async (req, res) => {
   try {
-    console.log('👥 getAllStudents called by admin:', req.user._id);
-    
     // Validate and sanitize input parameters
     const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10)); // Limit between 1-100
     const search = req.query.search ? req.query.search.toString().trim() : '';
     
-    // STRICT DATA ISOLATION: Only show students created by this admin
-    const baseQuery = {
-      userType: 'student',
-      adminId: req.user._id // CRITICAL: Only this admin's students
+    // Build query with proper validation
+    const query = {
+      userType: 'student'
     };
     
-    console.log('🔍 Strict admin isolation query:', { adminId: req.user._id, userType: 'student' });
+    // Add search conditions if search parameter exists
+    if (search && search.trim()) {
+      query.$or = [
+        { fullName: { $regex: search.trim(), $options: 'i' } },
+        { email: { $regex: search.trim(), $options: 'i' } },
+        { studentId: { $regex: search.trim(), $options: 'i' } },
+        { course: { $regex: search.trim(), $options: 'i' } }
+      ];
+    }
     
-    // Get students with strict admin filtering
-    let students = await User.find(baseQuery)
+    // Add status filter if provided
+    const status = req.query.status;
+    if (status && status !== 'all') {
+      if (status === 'active') {
+        query.isActive = true;
+      } else if (status === 'inactive') {
+        query.isActive = false;
+      }
+    }
+
+    const students = await User.find(query)
       .select('-password')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    
-    console.log('📊 Found students for admin:', students.length);
-    
-    // Apply search filter if provided
-    if (search && search.trim()) {
-      const searchLower = search.toLowerCase();
-      students = students.filter(student => 
-        student.fullName?.toLowerCase().includes(searchLower) ||
-        student.email?.toLowerCase().includes(searchLower) ||
-        student.studentId?.toLowerCase().includes(searchLower) ||
-        student.course?.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    // Apply status filter if provided
-    const status = req.query.status;
-    if (status && status !== 'all') {
-      if (status === 'active') {
-        students = students.filter(student => student.isActive === true);
-      } else if (status === 'inactive') {
-        students = students.filter(student => student.isActive === false);
-      }
-    }
-    
-    // Get total count for this admin only
-    const total = await User.countDocuments(baseQuery);
-    const pagination = {
-      current: page,
-      pages: Math.ceil(total / limit),
-      total: total,
-      limit: limit
-    };
 
-    console.log('✅ Returning isolated students:', {
-      count: students.length,
-      adminId: req.user._id,
-      page: page,
-      total: total
-    });
+    const total = await User.countDocuments(query);
 
     res.status(200).json({
       success: true,
       data: {
-        students: students,
-        pagination: pagination
+        students,
+        pagination: {
+          current: page,
+          pages: Math.ceil(total / limit),
+          total
+        }
       }
     });
-
   } catch (error) {
-    console.error('❌ getAllStudents error:', error);
+    console.error('Get all students error:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request parameters',
+        details: Object.values(error.errors).map(err => err.message)
+      });
+    }
+    
+    // Handle cast errors (invalid ObjectId, etc.)
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request parameters',
+        details: 'Invalid ID format'
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Server error'
     });
   }
 };
@@ -144,8 +144,7 @@ exports.createStudent = async (req, res) => {
       course: course || null,
       semester: semester || null,
       batch: batch || null,
-      rollNumber: rollNumber || null,
-      adminId: req.user._id // Link student to the admin who created them
+      rollNumber: rollNumber || null
     });
 
     console.log('Student created successfully:', student.studentId);
@@ -311,8 +310,7 @@ exports.bulkUploadStudents = async (req, res) => {
           course: normalizedData.course || null,
           semester: normalizedData.semester ? parseInt(normalizedData.semester) : null,
           batch: normalizedData.batch || null,
-          rollNumber: normalizedData.rollNumber || null,
-          adminId: req.user._id // Link student to the admin who uploaded them
+          rollNumber: normalizedData.rollNumber || null
         });
 
         results.success.push({
@@ -369,19 +367,15 @@ exports.bulkUploadStudents = async (req, res) => {
 // @access  Private (Admin only)
 exports.updateStudent = async (req, res) => {
   try {
-    console.log('✏️ updateStudent called by admin:', req.user._id, 'for student:', req.params.id);
-    
-    // STRICT DATA ISOLATION: Only allow admin to update their own students
     const student = await User.findOne({ 
       _id: req.params.id, 
-      userType: 'student',
-      adminId: req.user._id // CRITICAL: Only this admin's students
+      userType: 'student' 
     });
 
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found or you do not have permission to update this student'
+        error: 'Student not found'
       });
     }
 
@@ -419,19 +413,15 @@ exports.updateStudent = async (req, res) => {
 // @access  Private (Admin only)
 exports.deleteStudent = async (req, res) => {
   try {
-    console.log('🗑️ deleteStudent called by admin:', req.user._id, 'for student:', req.params.id);
-    
-    // STRICT DATA ISOLATION: Only allow admin to delete their own students
     const student = await User.findOne({ 
       _id: req.params.id, 
-      userType: 'student',
-      adminId: req.user._id // CRITICAL: Only this admin's students
+      userType: 'student' 
     });
 
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found or you do not have permission to delete this student'
+        error: 'Student not found'
       });
     }
 
@@ -443,7 +433,6 @@ exports.deleteStudent = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ deleteStudent error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -456,47 +445,29 @@ exports.deleteStudent = async (req, res) => {
 // @access  Private (Admin only)
 exports.getStudentStats = async (req, res) => {
   try {
-    console.log('📊 getStudentStats called by admin:', req.user._id);
-    
-    // STRICT DATA ISOLATION: Only show stats for this admin's students
-    const adminFilter = {
-      userType: 'student',
-      adminId: req.user._id // CRITICAL: Only this admin's students
-    };
-    
-    const totalStudents = await User.countDocuments(adminFilter);
-    const activeStudents = await User.countDocuments({ 
-      ...adminFilter,
-      isActive: true
-    });
+    const totalStudents = await User.countDocuments({ userType: 'student' });
+    const activeStudents = await User.countDocuments({ userType: 'student', isActive: true });
     const inactiveStudents = totalStudents - activeStudents;
 
-    // Students by course (admin-specific)
+    // Students by course
     const courseStats = await User.aggregate([
-      { $match: adminFilter },
+      { $match: { userType: 'student' } },
       { $group: { _id: '$course', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 
-    // Students by batch (admin-specific)
+    // Students by batch
     const batchStats = await User.aggregate([
-      { $match: adminFilter },
+      { $match: { userType: 'student' } },
       { $group: { _id: '$batch', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 
-    // Recent registrations (last 7 days, admin-specific)
+    // Recent registrations (last 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentRegistrations = await User.countDocuments({
-      ...adminFilter,
+      userType: 'student',
       createdAt: { $gte: sevenDaysAgo }
-    });
-
-    console.log('📊 Admin isolated stats:', {
-      adminId: req.user._id,
-      total: totalStudents,
-      active: activeStudents,
-      recent: recentRegistrations
     });
 
     res.status(200).json({
@@ -512,7 +483,6 @@ exports.getStudentStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ getStudentStats error:', error);
     res.status(500).json({
       success: false,
       error: error.message
