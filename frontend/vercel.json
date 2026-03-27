@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://exam-monitoring-l5jj.onrender.com/api/$1"
+      "destination": "https://examgen-rtod.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
