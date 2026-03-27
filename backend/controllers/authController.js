@@ -86,10 +86,14 @@ const registerAdmin = async (req, res, next) => {
 // Login user
 const login = async (req, res, next) => {
   try {
+    console.log('🔐 Login attempt:', req.body.email);
+    
     const { email, password } = req.body;
 
     // Check if user exists (include password field)
     const user = await User.findOne({ email }).select('+password');
+    console.log('👤 User found:', user ? 'YES' : 'NO');
+    
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -99,6 +103,8 @@ const login = async (req, res, next) => {
 
     // Check password
     const isPasswordMatch = await user.comparePassword(password);
+    console.log('🔑 Password match:', isPasswordMatch ? 'YES' : 'NO');
+    
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
