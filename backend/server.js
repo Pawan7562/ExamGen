@@ -7,9 +7,19 @@ const dotenv = require('dotenv');
 // Load env vars
 dotenv.config();
 
+console.log(' Environment Variables:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'SET' : 'NOT SET');
+
 // Connect DB
-const connectDB = require('./config/database');
-connectDB();
+try {
+  const connectDB = require('./config/database');
+  connectDB();
+  console.log(' Database connection initiated');
+} catch (error) {
+  console.error(' Database connection error:', error.message);
+}
 
 // Route files
 const auth = require('./routes/auth');
