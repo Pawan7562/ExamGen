@@ -32,6 +32,13 @@
     "twilio": "^5.10.2",
     "uuid": "^9.0.1",
     "vm2": "^3.9.19",
+    "winston": "^3.11.0",
+    "node-cache": "^5.1.2",
+    "redis": "^4.6.10",
+    "express-mongo-sanitize": "^2.2.0",
+    "xss-clean": "^0.1.4",
+    "hpp": "^0.2.3",
+    "compression": "^1.7.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
