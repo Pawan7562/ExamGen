@@ -108,7 +108,19 @@ app.get('/api/v1/test', (req, res) => {
 
 // Root route
 app.get('/', (req, res) => {
-  res.send('🚀 API Running');
+  console.log('🏠 Root endpoint called');
+  res.send('🚀 API Running - Latest Deployment');
+});
+
+// Simple test
+app.get('/ping', (req, res) => {
+  console.log('🏓 Ping endpoint called');
+  res.status(200).json({
+    success: true,
+    message: 'Pong',
+    timestamp: new Date().toISOString(),
+    version: '2.0'
+  });
 });
 
 // Health check
