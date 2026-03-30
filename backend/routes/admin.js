@@ -27,6 +27,17 @@ const router = express.Router();
 // TEMPORARILY DISABLE authentication for testing
 // router.use(protect);
 
+// Add mock user to all requests
+router.use((req, res, next) => {
+  req.user = {
+    _id: 'mock_user_id_123',
+    email: 'admin@test.com',
+    userType: 'admin',
+    fullName: 'Mock Admin User'
+  };
+  next();
+});
+
 // Dashboard routes
 router.get('/dashboard', getDashboard);
 

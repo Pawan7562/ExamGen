@@ -120,6 +120,17 @@ const answerValidation = [
 ];
 
 // Admin and Teacher routes (TEMPORARILY DISABLED authentication)
+// Add mock user to all requests
+router.use((req, res, next) => {
+  req.user = {
+    _id: 'mock_user_id_123',
+    email: 'admin@test.com',
+    userType: 'admin',
+    fullName: 'Mock Admin User'
+  };
+  next();
+});
+
 router.post('/', examValidation, createExam);
 router.get('/', getAdminExams);
 router.get('/stats', getExamStats);
