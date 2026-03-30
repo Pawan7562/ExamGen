@@ -112,7 +112,7 @@ app.get('/api/v1/test', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   console.log('🏠 Root endpoint called');
-  res.send('🚀 API Running - VERSION 3.0 - Rate Limiting OFF');
+  res.send('🚀 API Running - VERSION 4.0 - ALL AUTH DISABLED');
 });
 
 // Simple test
@@ -122,7 +122,27 @@ app.get('/ping', (req, res) => {
     success: true,
     message: 'Pong',
     timestamp: new Date().toISOString(),
-    version: '2.0'
+    version: '4.0'
+  });
+});
+
+// Test admin route without auth
+app.get('/api/v1/admin/test', (req, res) => {
+  console.log('🧪 Admin test endpoint called');
+  res.status(200).json({
+    success: true,
+    message: 'Admin endpoint working without auth',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Test exam route without auth
+app.get('/api/v1/exams/test', (req, res) => {
+  console.log('📝 Exam test endpoint called');
+  res.status(200).json({
+    success: true,
+    message: 'Exam endpoint working without auth',
+    timestamp: new Date().toISOString()
   });
 });
 
