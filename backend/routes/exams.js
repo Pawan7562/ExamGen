@@ -13,7 +13,7 @@ const {
   submitAnswer,
   submitExamAttempt,
   getExamStats
-} = require('../controllers/examController');
+} = require('../controllers/examController-mock'); // Use mock controller
 
 const { protect, authorize } = require('../middlewares/auth');
 

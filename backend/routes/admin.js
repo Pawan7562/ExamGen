@@ -9,7 +9,7 @@ const {
   getSubjects,
   createSubject,
   getMonitoringStats
-} = require('../controllers/adminController');
+} = require('../controllers/adminController-mock'); // Use mock controller
 const {
   getAllStudents,
   createStudent,
